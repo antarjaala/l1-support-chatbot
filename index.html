@@ -749,6 +749,28 @@
   }
   .key-btn:hover { border-color: var(--green); color: var(--green-dark); background: var(--green-light); }
   .key-set { border-color: var(--green); color: var(--green-dark); background: var(--green-light); }
+
+  .apikey-section { margin-bottom: 0; }
+  .apikey-row { display: flex; gap: 6px; margin-bottom: 5px; }
+  .apikey-input {
+    flex: 1; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: var(--radius-xs); padding: 7px 9px; font-family: "DM Mono", monospace;
+    font-size: 11px; color: white; outline: none; transition: border-color 0.15s;
+    min-width: 0;
+  }
+  .apikey-input::placeholder { color: rgba(255,255,255,0.3); }
+  .apikey-input:focus { border-color: var(--yellow); }
+  .apikey-save-btn {
+    background: var(--yellow); color: var(--dark); border: none;
+    border-radius: var(--radius-xs); padding: 7px 10px; font-size: 11px;
+    font-weight: 600; font-family: "DM Sans", sans-serif; cursor: pointer;
+    flex-shrink: 0; transition: all 0.15s; white-space: nowrap;
+  }
+  .apikey-save-btn:hover { background: #EDD700; }
+  .apikey-save-btn.saved { background: var(--green); color: white; }
+  .apikey-status { font-size: 10px; min-height: 14px; }
+  .apikey-status.ok { color: #6EE67E; }
+  .apikey-status.err { color: #FCA5A5; }
 </style>
 </head>
 <body>
@@ -825,7 +847,25 @@
     </div>
 
     <div class="sidebar-footer">
-      <button class="new-chat-btn" onclick="newChat()">
+      <div class="apikey-section">
+        <div class="sidebar-label" style="margin-bottom:6px;">Anthropic API Key</div>
+        <div class="apikey-row">
+          <input
+            type="password"
+            id="sidebarApiKey"
+            placeholder="sk-ant-..."
+            autocomplete="off"
+            class="apikey-input"
+            onkeydown="if(event.key==='Enter') saveApiKeySidebar()"
+          />
+          <button class="apikey-save-btn" onclick="saveApiKeySidebar()" id="apiSaveBtn">Save</button>
+        </div>
+        <div id="apiKeyStatus" class="apikey-status"></div>
+        <div style="font-size:10px;color:var(--gray-400);margin-top:5px;line-height:1.5;">
+          Get key: <a href="https://console.anthropic.com/keys" target="_blank" style="color:#6EE67E;">console.anthropic.com</a>
+        </div>
+      </div>
+      <button class="new-chat-btn" onclick="newChat()" style="margin-top:10px;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14">
           <path d="M12 5v14M5 12h14"/>
         </svg>
@@ -1034,7 +1074,7 @@ async function sendMessage() {
   if (!apiKey) {
     removeTyping();
     setLoading(false);
-    appendMessage('bot', 'Please set your Anthropic API key first by clicking the "Set API Key" button in the top-right corner.');
+    appendMessage('bot', 'Please enter your Anthropic API key in the sidebar on the left (bottom of the sidebar) and click Save.');
     showApiKeyModal();
     return;
   }
@@ -1063,7 +1103,7 @@ async function sendMessage() {
       const errType = data.error && data.error.type;
       if (errType === 'authentication_error') {
         clearApiKey();
-        appendMessage('bot', 'Invalid API key. Please click "Set API Key" in the header and enter a valid Anthropic API key from console.anthropic.com/keys');
+        appendMessage('bot', 'Invalid API key. Please update your API key in the sidebar on the left. Get a valid key from console.anthropic.com/keys'); setApiKeyStatus('Invalid key', 'err');
       } else {
         const errMsg = (data.error && data.error.message) || ('HTTP ' + response.status);
         appendMessage('bot', 'API error: ' + errMsg);
@@ -1214,40 +1254,42 @@ function getApiKey() {
 }
 function clearApiKey() {
   sessionStorage.removeItem('hh_l1_api_key');
-  updateKeyBtn(false);
+  setApiKeyStatus('', '');
+  const inp = document.getElementById('sidebarApiKey');
+  if (inp) inp.value = '';
+  const btn = document.getElementById('apiSaveBtn');
+  if (btn) { btn.textContent = 'Save'; btn.classList.remove('saved'); }
 }
-function updateKeyBtn(hasKey) {
-  const btn = document.getElementById('keyBtn');
-  const lbl = document.getElementById('keyBtnLabel');
-  if (hasKey) {
-    btn.classList.add('key-set');
-    lbl.textContent = 'API Key Set';
-  } else {
-    btn.classList.remove('key-set');
-    lbl.textContent = 'Set API Key';
-  }
+function setApiKeyStatus(msg, type) {
+  const el = document.getElementById('apiKeyStatus');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'apikey-status' + (type ? ' ' + type : '');
+}
+function saveApiKeySidebar() {
+  const inp = document.getElementById('sidebarApiKey');
+  const key = inp ? inp.value.trim() : '';
+  if (!key) { setApiKeyStatus('Please enter a key', 'err'); return; }
+  sessionStorage.setItem('hh_l1_api_key', key);
+  const btn = document.getElementById('apiSaveBtn');
+  if (btn) { btn.textContent = 'Saved'; btn.classList.add('saved'); }
+  setApiKeyStatus('Connected', 'ok');
 }
 function showApiKeyModal() {
-  const existing = getApiKey();
-  if (existing) document.getElementById('apiKeyInput').value = existing;
-  document.getElementById('apiKeyModal').style.display = 'flex';
-  setTimeout(() => document.getElementById('apiKeyInput').focus(), 50);
+  const inp = document.getElementById('sidebarApiKey');
+  if (inp) inp.focus();
 }
-function closeApiKeyModal() {
-  document.getElementById('apiKeyModal').style.display = 'none';
-}
-function saveApiKey() {
-  const key = document.getElementById('apiKeyInput').value.trim();
-  if (!key) return;
-  sessionStorage.setItem('hh_l1_api_key', key);
-  updateKeyBtn(true);
-  closeApiKeyModal();
-}
-document.getElementById('apiKeyInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') saveApiKey();
-});
-// Check on load
-if (getApiKey()) updateKeyBtn(true);
+// Check on load - populate sidebar field if key already in session
+(function() {
+  const k = getApiKey();
+  if (k) {
+    const inp = document.getElementById('sidebarApiKey');
+    if (inp) inp.value = k;
+    const btn = document.getElementById('apiSaveBtn');
+    if (btn) { btn.textContent = 'Saved'; btn.classList.add('saved'); }
+    setApiKeyStatus('Connected', 'ok');
+  }
+})();
 </script>
 
 </body>
