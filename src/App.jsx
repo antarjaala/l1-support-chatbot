@@ -1,4 +1,3 @@
-cat > src/App.jsx << 'ENDOFFILE'
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { SYSTEM_PROMPT, QUICK_QUERIES, STARTER_CHIPS, DRILL_SCENARIOS } from './constants'
 import styles from './App.module.css'
@@ -248,4 +247,3 @@ export default function App() {
     </div>
   )
 }
-ENDOFFILE
