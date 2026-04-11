@@ -6,6 +6,7 @@ const PhoneIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentCol
 const UserIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0112 0v2"/></svg>)
 const SendIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>)
 const PlusIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>)
+const HelpIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>)
 
 function FormattedText({ text }) {
   const parts = text.split('\n')
@@ -52,6 +53,7 @@ export default function App() {
   const [history, setHistory] = useState([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showGuide, setShowGuide] = useState(false)
   const [provider, setProvider] = useState(() => localStorage.getItem('hh_l1_provider') || 'groq')
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('hh_l1_api_key') || '')
   const [apiKeyInput, setApiKeyInput] = useState(() => localStorage.getItem('hh_l1_api_key') || '')
@@ -197,16 +199,63 @@ export default function App() {
             <div className={styles.headerAvatar}><UserIcon /></div>
             <div><div className={styles.chatTitle}>L1 Support Assistant</div><div className={styles.chatSubtitle}>Happiest Health PMS · ERPNext Healthcare</div></div>
           </div>
+          <button className={styles.helpBtn} onClick={() => setShowGuide(!showGuide)} title="How to use this chatbot"><HelpIcon /></button>
         </div>
+
+        {showGuide && (
+          <div className={styles.guidePanel}>
+            <div className={styles.guidePanelHeader}>
+              <h3>How to Use This Chatbot</h3>
+              <button className={styles.guideCloseBtn} onClick={() => setShowGuide(false)}>✕</button>
+            </div>
+            <div className={styles.guidePanelContent}>
+              <div className={styles.guideSection}>
+                <h4>🔑 Step 1: Add Your API Key</h4>
+                <p>Choose your AI provider (Groq for free or Anthropic for premium) in the sidebar dropdown. Paste your API key and click Save.</p>
+              </div>
+              <div className={styles.guideSection}>
+                <h4>🎯 Step 2: Ask Questions</h4>
+                <p>Type any question about Happiest Health PMS, ERPNext issues, billing, therapy sessions, or SLA procedures. The chatbot will provide detailed guidance.</p>
+              </div>
+              <div className={styles.guideSection}>
+                <h4>⚡ Step 3: Use Quick Queries</h4>
+                <p>Use the "Quick Queries" dropdown in the sidebar to instantly get answers to the most common L1 support issues. Perfect for quick lookups.</p>
+              </div>
+              <div className={styles.guideSection}>
+                <h4>📋 Step 4: Check SLA & Escalation</h4>
+                <p>Reference the SLA panel to understand priority levels and response times. Use the Escalation Contacts to know who to reach out to.</p>
+              </div>
+              <div className={styles.guideSection}>
+                <h4>💡 Pro Tips</h4>
+                <ul>
+                  <li><strong>Be Specific:</strong> Include patient names, ticket numbers, and exact error messages for better guidance.</li>
+                  <li><strong>Use Context:</strong> Mention which clinic, user role, or module you're dealing with.</li>
+                  <li><strong>Escalate Early:</strong> Don't hesitate to escalate to L2 if you suspect a system issue.</li>
+                  <li><strong>Document Everything:</strong> Always log tickets in ServiceNow before troubleshooting.</li>
+                  <li><strong>Free vs Paid:</strong> Groq (free) works great for most queries - try it first before using your Anthropic credit.</li>
+                </ul>
+              </div>
+              <div className={styles.guideSection}>
+                <h4>🚀 Example Queries</h4>
+                <p>✓ "Patient login fails from desktop but works on mobile - what's the fix?"<br/>✓ "How do I fix a frozen Razorpay payment?"<br/>✓ "Therapy plan shows In Progress even after sessions are done"<br/>✓ "What's the SLA for a P1 billing issue?"<br/>✓ "Who do I escalate infrastructure problems to?"</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className={styles.messages}>
           {messages.length === 0 && (
             <div className={styles.welcome}>
               <div className={styles.welcomeIcon}><PhoneIcon /></div>
               <h2 className={styles.welcomeTitle}>Happiest Health L1 Support Guide</h2>
-              <p className={styles.welcomeDesc}>Ask me anything about PMS issues, escalation decisions, billing, therapy sessions, or SLA timings.</p>
+              <p className={styles.welcomeDesc}>AI-powered first-contact resolution for Happiest Health PMS. Start by adding your API key in the sidebar.</p>
               <div className={styles.chips}>
                 {STARTER_CHIPS.map(c => <button key={c.label} className={styles.chip} onClick={() => sendMessage(c.query)}>{c.label}</button>)}
+              </div>
+              <div className={styles.welcomeHints}>
+                <div className={styles.hint}>💡 First time? Click the <strong>?</strong> button in the header for a quick guide.</div>
+                <div className={styles.hint}>⚡ Use <strong>Quick Queries</strong> in the sidebar for instant answers to common issues.</div>
+                <div className={styles.hint}>🔑 Choose <strong>Groq (free)</strong> or <strong>Anthropic</strong> from the provider dropdown.</div>
               </div>
             </div>
           )}

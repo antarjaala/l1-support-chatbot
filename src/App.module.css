@@ -55,6 +55,23 @@
 .chatHeader { padding:14px 22px; border-bottom:1px solid #D8E4D8; display:flex; align-items:center; justify-content:space-between; background:#fff; flex-shrink:0; }
 .chatHeaderLeft { display:flex; align-items:center; gap:10px; }
 .headerAvatar { width:34px; height:34px; border-radius:50%; background:#3AB54A; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:white; }
+.helpBtn { width:36px; height:36px; background:none; border:1px solid #D8E4D8; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#1A2E1A; transition:all 0.15s; flex-shrink:0; }
+.helpBtn:hover { background:#E8F5EA; border-color:#3AB54A; color:#3AB54A; }
+.guidePanel { position:absolute; top:60px; right:22px; background:#fff; border:1px solid #D8E4D8; border-radius:12px; width:380px; max-height:600px; overflow-y:auto; box-shadow:0 4px 12px rgba(26,46,26,0.15); z-index:1000; }
+.guidePanelHeader { padding:14px 16px; border-bottom:1px solid #D8E4D8; display:flex; align-items:center; justify-content:space-between; background:#f9fdf8; position:sticky; top:0; }
+.guidePanelHeader h3 { font-size:14px; font-weight:600; color:#1A2E1A; margin:0; }
+.guideCloseBtn { width:24px; height:24px; background:none; border:none; cursor:pointer; font-size:18px; color:#8FAF8F; transition:color 0.15s; }
+.guideCloseBtn:hover { color:#1A2E1A; }
+.guidePanelContent { padding:12px 14px; }
+.guideSection { margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid #E8F5EA; }
+.guideSection:last-child { border-bottom:none; margin-bottom:0; padding-bottom:0; }
+.guideSection h4 { font-size:12px; font-weight:600; color:#1A2E1A; margin:0 0 6px 0; }
+.guideSection p { font-size:11px; color:#5a7a5a; margin:0; line-height:1.5; }
+.guideSection ul { font-size:11px; color:#5a7a5a; margin:6px 0 0 16px; padding-left:0; line-height:1.6; }
+.guideSection li { margin-bottom:4px; }
+.guideSection strong { color:#1A2E1A; font-weight:600; }
+.guideSection em { color:#3AB54A; font-style:italic; }
+@media (max-width:680px) { .guidePanel { width:calc(100vw - 32px); right:16px; } }
 .chatTitle { font-size:14px; font-weight:600; color:#1A2E1A; }
 .chatSubtitle { font-size:11px; color:#5a7a5a; }
 .messages { flex:1; overflow-y:auto; padding:20px 22px; display:flex; flex-direction:column; gap:16px; scroll-behavior:smooth; }
@@ -62,6 +79,9 @@
 .welcomeIcon { width:56px; height:56px; background:#E8F5EA; border-radius:16px; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; border:2px solid #3AB54A; color:#3AB54A; }
 .welcomeTitle { font-size:17px; font-weight:600; color:#1A2E1A; margin-bottom:6px; }
 .welcomeDesc { font-size:13px; color:#5a7a5a; max-width:360px; margin:0 auto; }
+.welcomeHints { margin-top:16px; display:flex; flex-direction:column; gap:8px; max-width:360px; margin-left:auto; margin-right:auto; }
+.hint { font-size:11px; color:#5a7a5a; background:#E8F5EA; padding:8px 10px; border-radius:6px; border-left:3px solid #3AB54A; line-height:1.4; }
+.hint strong { color:#1A2E1A; font-weight:600; }
 .chips { display:flex; flex-wrap:wrap; gap:7px; justify-content:center; margin-top:18px; }
 .chip { background:#fff; border:1px solid #D8E4D8; border-radius:20px; padding:6px 14px; font-size:12px; color:#1A2E1A; cursor:pointer; transition:all 0.15s; font-family:'DM Sans',sans-serif; }
 .chip:hover { background:#E8F5EA; border-color:#3AB54A; color:#1E6B2A; }
