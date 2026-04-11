@@ -13,6 +13,8 @@
 .apiKeyInput { flex:1; min-width:0; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15); border-radius:6px; padding:8px 10px; font-family:'DM Mono',monospace; font-size:11px; color:#fff; outline:none; transition:border-color 0.15s; }
 .apiKeyInput::placeholder { color:rgba(255,255,255,0.3); }
 .apiKeyInput:focus { border-color:#FEE600; }
+.providerSelect { background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15); color:#fff; }
+.providerSelect option { background:#1A2E1A; color:#fff; }
 .apiKeySaveBtn { background:#FEE600; color:#1A2E1A; border:none; border-radius:6px; padding:8px 12px; font-size:12px; font-weight:600; font-family:'DM Sans',sans-serif; cursor:pointer; flex-shrink:0; transition:all 0.15s; }
 .apiKeySaveBtn:hover { background:#EDD700; }
 .apiKeySaved { background:#3AB54A !important; color:#fff !important; }

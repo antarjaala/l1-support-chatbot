@@ -124,7 +124,7 @@ export default function App() {
 
         <div className={styles.sidebarSection}>
           <div className={styles.sidebarLabel}>AI Provider</div>
-          <select className={styles.apiKeyInput} value={provider} onChange={e => { setProvider(e.target.value); setKeyStatus(''); localStorage.setItem('hh_l1_provider', e.target.value) }} style={{background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff'}}>
+          <select className={`${styles.apiKeyInput} ${styles.providerSelect}`} value={provider} onChange={e => { setProvider(e.target.value); setKeyStatus(''); localStorage.setItem('hh_l1_provider', e.target.value) }}>
             <option value="groq">Groq (Llama)</option>
             <option value="anthropic">Anthropic (Claude)</option>
           </select>
