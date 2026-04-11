@@ -7,7 +7,7 @@ export async function askAI(apiKey, systemPrompt, messages, provider = 'groq') {
       'x-provider': provider,
     },
     body: JSON.stringify({
-      model: provider === 'anthropic' ? 'claude-3-5-sonnet-20241022' : 'llama-3.3-70b-versatile',
+      model: provider === 'anthropic' ? 'claude-3-5-sonnet-latest' : 'llama-3.3-70b-versatile',
       max_tokens: 1024,
       system: systemPrompt,
       messages: messages.map(msg => ({
