@@ -1,24 +1,25 @@
-const WORKER_URL = 'https://hh-l1-proxy.shivaprasadsk.workers.dev'
-
-export async function askGroq(apiKey, systemPrompt, messages) {
-  const response = await fetch(WORKER_URL, {
+export async function askGemini(apiKey, systemPrompt, messages) {
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': apiKey,
     },
     body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
-      max_tokens: 1024,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        ...messages,
-      ],
+      systemInstruction: {
+        parts: [{ text: systemPrompt }]
+      },
+      contents: messages.map(msg => ({
+        role: msg.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: msg.content }]
+      })),
+      generationConfig: {
+        maxOutputTokens: 1024,
+      },
     }),
   })
   const data = await response.json()
   if (!response.ok || data.error) {
     throw new Error(data.error?.message || 'HTTP ' + response.status)
   }
-  return data.choices[0].message.content
+  return data.candidates[0].content.parts[0].text
 }
