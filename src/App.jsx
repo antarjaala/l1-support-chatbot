@@ -83,32 +83,10 @@ export default function App() {
     setHistory(newHistory)
     setLoading(true)
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': activeKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true',
-        },
-        body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1024, system: SYSTEM_PROMPT, messages: newHistory }),
-      })
-      const data = await res.json()
-      if (!res.ok || data.error) {
-        const errType = data.error?.type
-        let errText = data.error?.message || 'HTTP ' + res.status
-        if (errType === 'authentication_error') {
-          errText = 'Invalid API key. Please update the key in the sidebar.'
-          setKeyStatus('invalid')
-          setApiKey('')
-          localStorage.removeItem('hh_l1_api_key')
-        }
-        setMessages(prev => [...prev, { role: 'bot', content: errText, id: Date.now(), isError: true }])
-      } else {
-        const reply = data.content?.[0]?.text || 'No response received.'
-        setHistory(prev => [...prev, { role: 'assistant', content: reply }])
-        setMessages(prev => [...prev, { role: 'bot', content: reply, id: Date.now() }])
-      }
+      const { askGroq } = await import('./api.js')
+      const reply = await askGroq(apiKey, SYSTEM_PROMPT, newHistory)
+      setHistory(prev => [...prev, { role: 'assistant', content: reply }])
+      setMessages(prev => [...prev, { role: 'bot', content: reply, id: Date.now() }])
     } catch (err) {
       const isAuth = err.message?.includes('401') || err.message?.toLowerCase().includes('invalid')
       if (isAuth) { setKeyStatus('invalid'); setApiKey(''); localStorage.removeItem('hh_l1_api_key') }
