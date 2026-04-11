@@ -110,7 +110,9 @@ export default function App() {
         setMessages(prev => [...prev, { role: 'bot', content: reply, id: Date.now() }])
       }
     } catch (err) {
-      setMessages(prev => [...prev, { role: 'bot', content: 'Network error: ' + err.message + '. Check your connection and API key.', id: Date.now(), isError: true }])
+      const isAuth = err.message?.includes('401') || err.message?.toLowerCase().includes('invalid')
+      if (isAuth) { setKeyStatus('invalid'); setApiKey(''); localStorage.removeItem('hh_l1_api_key') }
+      setMessages(prev => [...prev, { role: 'bot', content: 'Error: ' + (err.message || 'Unknown error'), id: Date.now(), isError: true }])
     }
     setLoading(false)
   }, [input, loading, apiKey, history])
@@ -142,13 +144,13 @@ export default function App() {
         </div>
 
         <div className={styles.apiKeySection}>
-          <div className={styles.sidebarLabel}>Anthropic API Key</div>
+          <div className={styles.sidebarLabel}>Groq API Key</div>
           <div className={styles.apiKeyRow}>
-            <input type="password" className={styles.apiKeyInput} placeholder="sk-ant-..." value={apiKeyInput} onChange={e => { setApiKeyInput(e.target.value); setKeyStatus('') }} onKeyDown={e => e.key === 'Enter' && saveApiKey()} autoComplete="off" />
+            <input type="password" className={styles.apiKeyInput} placeholder="gsk_..." value={apiKeyInput} onChange={e => { setApiKeyInput(e.target.value); setKeyStatus('') }} onKeyDown={e => e.key === 'Enter' && saveApiKey()} autoComplete="off" />
             <button className={`${styles.apiKeySaveBtn} ${keyStatus === 'saved' ? styles.apiKeySaved : ''}`} onClick={saveApiKey}>{keyStatus === 'saved' ? '✓ Saved' : 'Save'}</button>
           </div>
           {keyStatusMsg && <div className={`${styles.keyStatus} ${keyStatusMsg.cls}`}>{keyStatusMsg.text}</div>}
-          <div className={styles.keyHint}>Get key: <a href="https://console.anthropic.com/keys" target="_blank" rel="noreferrer" className={styles.keyLink}>console.anthropic.com</a></div>
+          <div className={styles.keyHint}>Get key: <a href="https://console.groq.com/keys" target="_blank" rel="noreferrer" className={styles.keyLink}>console.groq.com</a></div>
         </div>
 
         <div className={styles.sidebarDivider} />
