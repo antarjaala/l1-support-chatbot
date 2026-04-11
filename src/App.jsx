@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
-import { SYSTEM_PROMPT, QUICK_QUERIES, STARTER_CHIPS, DRILL_SCENARIOS } from './constants'
+import { SYSTEM_PROMPT, QUICK_QUERIES, STARTER_CHIPS } from './constants'
 import styles from './App.module.css'
 
 const PhoneIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="20" height="20"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 .94h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>)
@@ -52,11 +52,9 @@ export default function App() {
   const [history, setHistory] = useState([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const [mode, setMode] = useState('chat')
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('hh_l1_api_key') || '')
   const [apiKeyInput, setApiKeyInput] = useState(() => localStorage.getItem('hh_l1_api_key') || '')
   const [keyStatus, setKeyStatus] = useState(() => localStorage.getItem('hh_l1_api_key') ? 'saved' : '')
-  const [drillAnswers, setDrillAnswers] = useState({})
   const messagesEndRef = useRef(null)
   const textareaRef = useRef(null)
 
@@ -161,69 +159,40 @@ export default function App() {
             <div className={styles.headerAvatar}><UserIcon /></div>
             <div><div className={styles.chatTitle}>L1 Support Assistant</div><div className={styles.chatSubtitle}>Happiest Health PMS · ERPNext Healthcare</div></div>
           </div>
-          <div className={styles.modeTabs}>
-            <button className={`${styles.modeTab} ${mode==='chat'?styles.modeTabActive:''}`} onClick={() => setMode('chat')}>Chat</button>
-            <button className={`${styles.modeTab} ${mode==='drill'?styles.modeTabActive:''}`} onClick={() => setMode('drill')}>Scenario Drill</button>
-          </div>
         </div>
 
-        {mode === 'chat' && (
-          <>
-            <div className={styles.messages}>
-              {messages.length === 0 && (
-                <div className={styles.welcome}>
-                  <div className={styles.welcomeIcon}><PhoneIcon /></div>
-                  <h2 className={styles.welcomeTitle}>Happiest Health L1 Support Guide</h2>
-                  <p className={styles.welcomeDesc}>Ask me anything about PMS issues, escalation decisions, billing, therapy sessions, or SLA timings.</p>
-                  <div className={styles.chips}>
-                    {STARTER_CHIPS.map(c => <button key={c.label} className={styles.chip} onClick={() => sendMessage(c.query)}>{c.label}</button>)}
-                  </div>
-                </div>
-              )}
-              {messages.map(msg => (
-                <div key={msg.id} className={`${styles.msg} ${msg.role==='user'?styles.userMsg:''}`}>
-                  <div className={`${styles.msgAvatar} ${msg.role==='user'?styles.userAvatar:styles.botAvatar}`}>{msg.role==='user'?'ME':'AI'}</div>
-                  <div className={styles.msgBody}>
-                    <div className={`${styles.msgSender} ${msg.role==='user'?styles.userSender:''}`}>{msg.role==='user'?'You':'L1 Assistant'}</div>
-                    <div className={`${styles.bubble} ${msg.role==='user'?styles.userBubble:styles.botBubble} ${msg.isError?styles.errorBubble:''}`}>
-                      {msg.role==='user' ? msg.content : <FormattedText text={msg.content} />}
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {loading && <TypingIndicator />}
-              <div ref={messagesEndRef} />
-            </div>
-            <div className={styles.inputArea}>
-              <div className={styles.inputRow}>
-                <textarea ref={textareaRef} className={styles.textarea} placeholder="Describe the user's issue or ask a question..." value={input} onChange={handleTextareaInput} onKeyDown={handleKeyDown} rows={1} />
-                <button className={styles.sendBtn} onClick={() => sendMessage()} disabled={loading || !input.trim()}><SendIcon /></button>
+        <div className={styles.messages}>
+          {messages.length === 0 && (
+            <div className={styles.welcome}>
+              <div className={styles.welcomeIcon}><PhoneIcon /></div>
+              <h2 className={styles.welcomeTitle}>Happiest Health L1 Support Guide</h2>
+              <p className={styles.welcomeDesc}>Ask me anything about PMS issues, escalation decisions, billing, therapy sessions, or SLA timings.</p>
+              <div className={styles.chips}>
+                {STARTER_CHIPS.map(c => <button key={c.label} className={styles.chip} onClick={() => sendMessage(c.query)}>{c.label}</button>)}
               </div>
-              <div className={styles.inputHint}><span>Enter to send · Shift+Enter for new line</span><span className={styles.hintTag}>Symptom → Steps → Escalate If</span></div>
             </div>
-          </>
-        )}
-
-        {mode === 'drill' && (
-          <div className={styles.drillPanel}>
-            <p className={styles.drillIntro}>Test yourself with real Happiest Health support scenarios. Type what you would do, then reveal the correct answer.</p>
-            {DRILL_SCENARIOS.map((sc, i) => (
-              <div key={i} className={styles.drillCard}>
-                <div className={styles.drillHeader}><span className={styles.drillTag}>{sc.tag}</span><span className={styles.drillNum}>Scenario {i+1} of {DRILL_SCENARIOS.length}</span></div>
-                <div className={styles.drillScenario}>{sc.scenario}</div>
-                <div className={styles.drillBody}>
-                  <textarea className={styles.drillTextarea} rows={3} placeholder="Type what steps you would take on this call..." />
-                  <div className={styles.drillActions}>
-                    <button className={styles.drillRevealBtn} onClick={() => setDrillAnswers(prev => ({...prev,[i]:!prev[i]}))}>
-                      {drillAnswers[i] ? 'Hide Answer' : 'Reveal Correct Answer'}
-                    </button>
-                  </div>
-                  {drillAnswers[i] && <div className={styles.drillAnswer}><strong>Correct steps:</strong><FormattedText text={sc.answer} /></div>}
+          )}
+          {messages.map(msg => (
+            <div key={msg.id} className={`${styles.msg} ${msg.role==='user'?styles.userMsg:''}`}>
+              <div className={`${styles.msgAvatar} ${msg.role==='user'?styles.userAvatar:styles.botAvatar}`}>{msg.role==='user'?'ME':'AI'}</div>
+              <div className={styles.msgBody}>
+                <div className={`${styles.msgSender} ${msg.role==='user'?styles.userSender:''}`}>{msg.role==='user'?'You':'L1 Assistant'}</div>
+                <div className={`${styles.bubble} ${msg.role==='user'?styles.userBubble:styles.botBubble} ${msg.isError?styles.errorBubble:''}`}>
+                  {msg.role==='user' ? msg.content : <FormattedText text={msg.content} />}
                 </div>
               </div>
-            ))}
+            </div>
+          ))}
+          {loading && <TypingIndicator />}
+          <div ref={messagesEndRef} />
+        </div>
+        <div className={styles.inputArea}>
+          <div className={styles.inputRow}>
+            <textarea ref={textareaRef} className={styles.textarea} placeholder="Describe the user's issue or ask a question..." value={input} onChange={handleTextareaInput} onKeyDown={handleKeyDown} rows={1} />
+            <button className={styles.sendBtn} onClick={() => sendMessage()} disabled={loading || !input.trim()}><SendIcon /></button>
           </div>
-        )}
+          <div className={styles.inputHint}><span>Enter to send · Shift+Enter for new line</span><span className={styles.hintTag}>Symptom → Steps → Escalate If</span></div>
+        </div>
       </main>
     </div>
   )

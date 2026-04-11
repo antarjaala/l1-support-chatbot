@@ -46,9 +46,6 @@
 .headerAvatar { width:34px; height:34px; border-radius:50%; background:#3AB54A; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:white; }
 .chatTitle { font-size:14px; font-weight:600; color:#1A2E1A; }
 .chatSubtitle { font-size:11px; color:#5a7a5a; }
-.modeTabs { display:flex; gap:4px; background:#EFF3EF; border-radius:8px; padding:3px; }
-.modeTab { padding:5px 12px; border-radius:6px; font-size:11px; font-weight:500; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s; color:#5a7a5a; background:transparent; }
-.modeTabActive { background:#fff; color:#1E6B2A; box-shadow:0 1px 4px rgba(0,0,0,0.08); }
 .messages { flex:1; overflow-y:auto; padding:20px 22px; display:flex; flex-direction:column; gap:16px; scroll-behavior:smooth; }
 .welcome { text-align:center; padding:32px 20px 16px; }
 .welcomeIcon { width:56px; height:56px; background:#E8F5EA; border-radius:16px; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; border:2px solid #3AB54A; color:#3AB54A; }
@@ -90,19 +87,4 @@
 .sendBtn:disabled { background:#D8E4D8; cursor:not-allowed; transform:none; }
 .inputHint { font-size:11px; color:#5a7a5a; margin-top:7px; display:flex; align-items:center; gap:12px; }
 .hintTag { background:#E8F5EA; color:#1E6B2A; border-radius:4px; padding:1px 6px; font-size:10px; font-weight:600; }
-.drillPanel { flex:1; overflow-y:auto; padding:20px 22px; display:flex; flex-direction:column; gap:14px; }
-.drillIntro { font-size:13px; color:#5a7a5a; text-align:center; padding:0 20px; }
-.drillCard { background:#fff; border:1px solid #D8E4D8; border-radius:12px; overflow:hidden; }
-.drillHeader { background:#1A2E1A; padding:10px 16px; display:flex; align-items:center; justify-content:space-between; }
-.drillTag { font-size:10px; font-weight:600; color:#FEE600; letter-spacing:0.07em; text-transform:uppercase; }
-.drillNum { font-size:11px; color:rgba(255,255,255,0.4); }
-.drillScenario { font-size:14px; font-weight:500; color:white; padding:12px 16px; background:#243324; border-bottom:1px solid rgba(255,255,255,0.06); font-style:italic; }
-.drillBody { padding:14px 16px; }
-.drillTextarea { width:100%; border:1px solid #D8E4D8; border-radius:8px; padding:9px 12px; font-family:'DM Sans',sans-serif; font-size:13px; color:#1A2E1A; outline:none; margin-bottom:10px; resize:vertical; transition:border-color 0.15s; }
-.drillTextarea:focus { border-color:#3AB54A; box-shadow:0 0 0 3px rgba(58,181,74,0.1); }
-.drillActions { margin-bottom:8px; display:flex; flex-wrap:wrap; gap:8px; }
-.drillRevealBtn { background:#FEE600; color:#1A2E1A; border:1px solid #1A2E1A; border-radius:8px; padding:10px 16px; font-size:13px; font-weight:600; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.15s; white-space:nowrap; min-width:auto; display:inline-block; }
-.drillRevealBtn:hover { background:#EDD700; }
-.drillAnswer { margin-top:10px; padding:12px 14px; background:#E8F5EA; border-left:3px solid #3AB54A; border-radius:0 8px 8px 0; font-size:13px; color:#1A2E1A; }
-.drillAnswer strong { display:block; margin-bottom:8px; font-weight:600; color:#1E6B2A; }
 @media (max-width:680px) { .sidebar { display:none; } }
