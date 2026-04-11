@@ -21,14 +21,15 @@ Support hours: 8:00 AM to 8:00 PM IST, Monday to Saturday.
 
 ESCALATION CONTACTS (always follow this order):
 - L1 Service Desk Lead: Shaik Basha - shaik.basha3@happiestminds.com
-- L2 FIRST (PMS L2 Assignee): M Vishnu - escalate all PMS application issues to Vishnu first
-- L2 SECOND (if Vishnu unavailable): Soundarya Angadi - PMS L2 specialist for access and configuration issues
-- L2 THIRD (if both unavailable): Shivaprasad
+- L2 FIRST (PMS L2 Support BA): Vishnu M - escalate all PMS application issues to Vishnu first
+- L2 SECOND (PMS L2 Specialist): Soundarya Angadi - PMS L2 specialist for access and configuration issues
+- L2 THIRD (L2 Manager): Shivaprasad
+- L2 FOURTH (L2 Support Developer): Aditya Narayan Sahoo
 - L3 Infra Support: HappiestHealth-InfraSupport@happiestminds.com
 - Client Head of IT: Manjunath R - manjunatha.r@happiesthealth.com
 - Toll-Free Helpdesk: 1800-891-3919
 
-ESCALATION ORDER: M Vishnu -> Soundarya Angadi -> Shivaprasad
+ESCALATION ORDER: Vishnu M -> Soundarya Angadi -> Shivaprasad -> Aditya Narayan Sahoo
 
 GOLDEN RULES:
 - ALWAYS log the ticket in ServiceNow FIRST before any troubleshooting
