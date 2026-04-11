@@ -45,13 +45,85 @@ RESPONSE FORMAT:
 Keep responses concise and practical. Plain language. No jargon. Be direct and actionable.`
 
 export const QUICK_QUERIES = [
-  { icon: '💳', label: 'Razorpay link not working', query: 'Razorpay payment link is not showing. What do I do?' },
-  { icon: '🔐', label: 'Login issue - desktop only', query: 'User cannot log in to PMS on desktop but can on tablet' },
-  { icon: '🧾', label: 'Wrong tax on invoice', query: 'Invoice shows wrong tax or missing tax. How to fix?' },
-  { icon: '🏥', label: 'Therapy plan stuck', query: 'Therapy plan still shows In Progress even after all sessions are done' },
-  { icon: '📅', label: 'Doctor not in dropdown', query: 'Doctor is not visible in the appointment booking dropdown' },
-  { icon: '📄', label: 'Duplicate invoice created', query: 'Duplicate invoice was created by mistake. What should I do?' },
-  { icon: '🏢', label: 'Wrong clinic on dashboard', query: 'Dashboard shows wrong clinic after login' },
+  // Login & Access Issues
+  { icon: '🔐', label: 'Cannot login - desktop only', query: 'User cannot log in to PMS on desktop but can on tablet' },
+  { icon: '🔐', label: 'Cannot login - both devices', query: 'User cannot log in from any device' },
+  { icon: '🔐', label: 'Session expired frequently', query: 'User session keeps expiring every few minutes' },
+  { icon: '🏢', label: 'Wrong clinic dashboard', query: 'Dashboard shows wrong clinic after login' },
+  { icon: '🔄', label: 'Zscaler update needed', query: 'User needs Zscaler update for access' },
+
+  // Patient Registration Issues
+  { icon: '👤', label: 'Duplicate patient error', query: 'System shows duplicate patient error on save' },
+  { icon: '📱', label: 'SMS not received', query: 'Patient did not receive registration SMS' },
+  { icon: '📧', label: 'Email not received', query: 'Patient did not receive registration email' },
+  { icon: '⚠️', label: 'Mandatory field missing', query: 'Patient registration fails due to missing mandatory fields' },
+
+  // Appointment Issues
+  { icon: '📅', label: 'Doctor not in dropdown', query: 'Doctor is not visible in appointment booking dropdown' },
+  { icon: '👨‍⚕️', label: 'Doctor schedule missing', query: 'Doctor has no schedule assigned' },
+  { icon: '🏥', label: 'Service unit mapping', query: 'Service unit not mapped to medical department' },
+  { icon: '❌', label: 'Appointment confirmation', query: 'Cannot confirm appointment booking' },
+  { icon: '🔄', label: 'Reschedule appointment', query: 'How to reschedule an existing appointment' },
+
+  // Billing & Invoice Issues
+  { icon: '💰', label: 'Wrong tax calculation', query: 'Invoice shows wrong tax or missing tax' },
+  { icon: '🏷️', label: 'Tax template missing', query: 'Tax template not linked to invoice items' },
+  { icon: '📄', label: 'Duplicate invoice created', query: 'Duplicate invoice was created by mistake' },
+  { icon: '💸', label: 'Discount not applying', query: 'Discount not applying correctly to invoice' },
+  { icon: '❌', label: 'Cannot delete invoice', query: 'How to handle incorrect invoice without deletion' },
+  { icon: '🔄', label: 'Credit note process', query: 'How to create credit note for invoice correction' },
+
+  // Razorpay Payment Issues
+  { icon: '💳', label: 'Razorpay link not working', query: 'Razorpay payment link is not showing' },
+  { icon: '❄️', label: 'Payment frozen', query: 'Razorpay payment is frozen and cannot proceed' },
+  { icon: '📱', label: 'QR code fallback', query: 'How to use QR code when Razorpay link fails' },
+  { icon: '⚙️', label: 'POS profile wrong', query: 'POS profile not set to RP Phone' },
+  { icon: '🔄', label: 'Cancel frozen payment', query: 'How to cancel a frozen Razorpay payment' },
+
+  // Therapy Session Issues
+  { icon: '🏥', label: 'Therapy plan stuck', query: 'Therapy plan still shows In Progress after all sessions' },
+  { icon: '📝', label: 'Session not submitted', query: 'Therapy session saved but not submitted' },
+  { icon: '📋', label: 'External treatment field', query: 'External treatment field missing on encounter' },
+  { icon: '📝', label: 'Post-therapy notes', query: 'How to add clinical notes after therapy session' },
+  { icon: '✅', label: 'Complete therapy plan', query: 'How to mark therapy plan as complete' },
+
+  // Patient Encounter Issues
+  { icon: '👨‍⚕️', label: 'Encounter validation error', query: 'Patient encounter submission fails with validation error' },
+  { icon: '📋', label: 'Dropdown field issue', query: 'Dropdown fields not working properly in encounter' },
+  { icon: '🚶', label: 'Walk-in encounter', query: 'How to create encounter for walk-in patient' },
+  { icon: '📅', label: 'Appointment encounter', query: 'Cannot create encounter from confirmed appointment' },
+
+  // Report Issues
+  { icon: '📊', label: 'Sales register access', query: 'Cannot access Service Itemwise Sales Register' },
+  { icon: '💰', label: 'Cash collection report', query: 'Cash Collection Report not showing data' },
+  { icon: '📤', label: 'Export to Excel', query: 'How to export reports to CSV or Excel' },
+  { icon: '📅', label: 'Report date filters', query: 'Report date filters not working correctly' },
+
+  // System Performance Issues
+  { icon: '🐌', label: 'System slow', query: 'PMS system is running very slowly' },
+  { icon: '🔄', label: 'Page not loading', query: 'Specific page is not loading or timing out' },
+  { icon: '💾', label: 'Browser cache issue', query: 'Browser cache causing display problems' },
+  { icon: '🔄', label: 'Session defaults', query: 'Session defaults not set correctly' },
+
+  // User Access & Permissions
+  { icon: '👤', label: 'User role permissions', query: 'User cannot access certain features due to permissions' },
+  { icon: '🏥', label: 'Clinic access restriction', query: 'User restricted to wrong clinic access' },
+  { icon: '🔑', label: 'Password reset', query: 'User needs password reset assistance' },
+
+  // Data Entry Issues
+  { icon: '📝', label: 'Auto-save not working', query: 'Form data not auto-saving as expected' },
+  { icon: '💾', label: 'Save button missing', query: 'Save or submit button not visible' },
+  { icon: '⚠️', label: 'Validation errors', query: 'Form showing unexpected validation errors' },
+
+  // Integration Issues
+  { icon: '📱', label: 'WhatsApp notifications', query: 'WhatsApp notifications not being sent' },
+  { icon: '📧', label: 'Email notifications', query: 'Email notifications not working' },
+  { icon: '🔗', label: 'External system sync', query: 'Data not syncing with external systems' },
+
+  // Emergency & Critical Issues
+  { icon: '🚨', label: 'System completely down', query: 'PMS system is completely inaccessible' },
+  { icon: '💰', label: 'Billing system failure', query: 'Cannot create any invoices or process payments' },
+  { icon: '👥', label: 'Multiple users affected', query: 'Issue affecting multiple users simultaneously' },
 ]
 
 export const STARTER_CHIPS = [

@@ -143,11 +143,19 @@ export default function App() {
         <div className={styles.sidebarDivider} />
         <div className={styles.sidebarSection}>
           <div className={styles.sidebarLabel}>Quick Queries</div>
-          {QUICK_QUERIES.map(q => (
-            <button key={q.label} className={styles.quickBtn} onClick={() => sendMessage(q.query)}>
-              <span className={styles.qIcon}>{q.icon}</span>{q.label}
-            </button>
-          ))}
+          <select className={`${styles.apiKeyInput} ${styles.querySelect}`} onChange={(e) => {
+            if (e.target.value) {
+              sendMessage(e.target.value);
+              e.target.value = ''; // Reset selection
+            }
+          }}>
+            <option value="">Select a common issue...</option>
+            {QUICK_QUERIES.map((q, index) => (
+              <option key={index} value={q.query}>
+                {q.icon} {q.label}
+              </option>
+            ))}
+          </select>
         </div>
         <div className={styles.sidebarDivider} />
         <div className={styles.sidebarSection}>
