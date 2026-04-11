@@ -25,13 +25,23 @@ export default {
         })
       })
     } else {
+      const groqMessages = []
+      if (body.system) {
+        groqMessages.push({ role: 'system', content: body.system })
+      }
+      groqMessages.push(...(body.messages || []))
+      
       apiRes = await fetch('https://api.groq.com/openai/v1/chat/completions', { 
         method: 'POST', 
         headers: { 
           'Content-Type': 'application/json', 
           'Authorization': 'Bearer ' + apiKey 
         }, 
-        body: JSON.stringify(body) 
+        body: JSON.stringify({
+          model: body.model || 'llama-3.3-70b-versatile',
+          max_tokens: body.max_tokens || 1024,
+          messages: groqMessages
+        })
       })
     }
     
