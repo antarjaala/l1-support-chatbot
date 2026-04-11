@@ -52,6 +52,7 @@ export default function App() {
   const [history, setHistory] = useState([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [provider, setProvider] = useState(() => localStorage.getItem('hh_l1_provider') || 'groq')
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('hh_l1_api_key') || '')
   const [apiKeyInput, setApiKeyInput] = useState(() => localStorage.getItem('hh_l1_api_key') || '')
   const [keyStatus, setKeyStatus] = useState(() => localStorage.getItem('hh_l1_api_key') ? 'saved' : '')
@@ -64,6 +65,7 @@ export default function App() {
     const k = apiKeyInput.trim()
     if (!k) { setKeyStatus('empty'); return }
     localStorage.setItem('hh_l1_api_key', k)
+    localStorage.setItem('hh_l1_provider', provider)
     setApiKey(k)
     setKeyStatus('saved')
   }
@@ -81,8 +83,8 @@ export default function App() {
     setHistory(newHistory)
     setLoading(true)
     try {
-      const { askGroq } = await import('./api.js')
-      const reply = await askGroq(apiKey, SYSTEM_PROMPT, newHistory)
+      const { askAI } = await import('./api.js')
+      const reply = await askAI(apiKey, SYSTEM_PROMPT, newHistory, provider)
       setHistory(prev => [...prev, { role: 'assistant', content: reply }])
       setMessages(prev => [...prev, { role: 'bot', content: reply, id: Date.now() }])
     } catch (err) {
@@ -120,21 +122,29 @@ export default function App() {
           <div className={styles.statusPill}><span className={styles.statusDot} />Assistant Online</div>
         </div>
 
+        <div className={styles.sidebarSection}>
+          <div className={styles.sidebarLabel}>AI Provider</div>
+          <select className={styles.apiKeyInput} value={provider} onChange={e => { setProvider(e.target.value); setKeyStatus(''); localStorage.setItem('hh_l1_provider', e.target.value) }} style={{background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff'}}>
+            <option value="groq">Groq (Llama)</option>
+            <option value="anthropic">Anthropic (Claude)</option>
+          </select>
+        </div>
+
         <div className={styles.apiKeySection}>
-          <div className={styles.sidebarLabel}>Groq API Key</div>
+          <div className={styles.sidebarLabel}>{provider === 'anthropic' ? 'Anthropic API Key' : 'Groq API Key'}</div>
           <div className={styles.apiKeyRow}>
-            <input type="password" className={styles.apiKeyInput} placeholder="gsk_..." value={apiKeyInput} onChange={e => { setApiKeyInput(e.target.value); setKeyStatus('') }} onKeyDown={e => e.key === 'Enter' && saveApiKey()} autoComplete="off" />
+            <input type="password" className={styles.apiKeyInput} placeholder={provider === 'anthropic' ? 'sk-ant-...' : 'gsk_...'} value={apiKeyInput} onChange={e => { setApiKeyInput(e.target.value); setKeyStatus('') }} onKeyDown={e => e.key === 'Enter' && saveApiKey()} autoComplete="off" />
             <button className={`${styles.apiKeySaveBtn} ${keyStatus === 'saved' ? styles.apiKeySaved : ''}`} onClick={saveApiKey}>{keyStatus === 'saved' ? '✓ Saved' : 'Save'}</button>
           </div>
           {keyStatusMsg && <div className={`${styles.keyStatus} ${keyStatusMsg.cls}`}>{keyStatusMsg.text}</div>}
-          <div className={styles.keyHint}>Get key: <a href="https://console.groq.com/keys" target="_blank" rel="noreferrer" className={styles.keyLink}>console.groq.com</a></div>
+          <div className={styles.keyHint}>Get key: <a href={provider === 'anthropic' ? 'https://console.anthropic.com/' : 'https://console.groq.com/keys'} target="_blank" rel="noreferrer" className={styles.keyLink}>{provider === 'anthropic' ? 'console.anthropic.com' : 'console.groq.com'}</a></div>
         </div>
 
         <div className={styles.sidebarDivider} />
         <div className={styles.sidebarSection}>
           <div className={styles.sidebarLabel}>Quick Queries</div>
           {QUICK_QUERIES.map(q => (
-            <button key={q.label} className={styles.quickBtn} onClick={() => { setMode('chat'); sendMessage(q.query) }}>
+            <button key={q.label} className={styles.quickBtn} onClick={() => sendMessage(q.query)}>
               <span className={styles.qIcon}>{q.icon}</span>{q.label}
             </button>
           ))}
