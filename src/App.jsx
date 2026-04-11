@@ -159,6 +159,26 @@ export default function App() {
         </div>
         <div className={styles.sidebarDivider} />
         <div className={styles.sidebarSection}>
+          <div className={styles.sidebarLabel}>Escalation Contacts</div>
+          <div className={styles.contactCard}>
+            {[
+              { order: '1st', name: 'M Vishnu', role: 'L2 Support BA' },
+              { order: '2nd', name: 'Soundarya Angadi', role: 'PMS L2 Specialist' },
+              { order: '3rd', name: 'Shivaprasad', role: 'L2 Manager' },
+              { order: '4th', name: 'Aditya Narayan Sahoo', role: 'L2 Support Dev' }
+            ].map((contact, idx) => (
+              <div key={idx} className={styles.contactRow}>
+                <span className={styles.contactOrder}>{contact.order}</span>
+                <div className={styles.contactInfo}>
+                  <div className={styles.contactName}>{contact.name}</div>
+                  <div className={styles.contactRole}>{contact.role}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className={styles.sidebarDivider} />
+        <div className={styles.sidebarSection}>
           <div className={styles.sidebarLabel}>SLA Reference</div>
           <div className={styles.slaCard}>
             {[{p:'P1',cls:styles.p1,time:'Respond 15 min · Resolve 2 hr'},{p:'P2',cls:styles.p2,time:'Respond 15 min · Resolve 4 hr'},{p:'P3',cls:styles.p3,time:'Respond 2 hr · Resolve 2 days'},{p:'P4',cls:styles.p4,time:'Respond 1 day · Next release'}].map(row => (
