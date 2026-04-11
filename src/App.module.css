@@ -101,7 +101,7 @@
 .drillTextarea { width:100%; border:1px solid #D8E4D8; border-radius:8px; padding:9px 12px; font-family:'DM Sans',sans-serif; font-size:13px; color:#1A2E1A; outline:none; margin-bottom:10px; resize:vertical; transition:border-color 0.15s; }
 .drillTextarea:focus { border-color:#3AB54A; box-shadow:0 0 0 3px rgba(58,181,74,0.1); }
 .drillActions { margin-bottom:8px; }
-.drillRevealBtn { background:#FEE600; color:#1A2E1A; border:none; border-radius:8px; padding:8px 18px; font-size:13px; font-weight:600; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.15s; }
+.drillRevealBtn { background:#FEE600; color:#1A2E1A; border:1px solid #1A2E1A; border-radius:8px; padding:8px 18px; font-size:13px; font-weight:600; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.15s; }
 .drillRevealBtn:hover { background:#EDD700; }
 .drillAnswer { margin-top:10px; padding:12px 14px; background:#E8F5EA; border-left:3px solid #3AB54A; border-radius:0 8px 8px 0; font-size:13px; color:#1A2E1A; }
 .drillAnswer strong { display:block; margin-bottom:8px; font-weight:600; color:#1E6B2A; }
