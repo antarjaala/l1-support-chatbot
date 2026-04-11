@@ -17,12 +17,7 @@ export default {
           'x-api-key': apiKey,
           'anthropic-version': '2023-06-01'
         }, 
-        body: JSON.stringify({
-          model: body.model || 'claude-opus-4-1',
-          max_tokens: body.max_tokens || 1024,
-          system: body.messages[0]?.role === 'system' ? body.messages[0].content : body.system,
-          messages: body.messages[0]?.role === 'system' ? body.messages.slice(1) : body.messages
-        })
+        body: JSON.stringify(body)
       })
     } else {
       const groqMessages = []
