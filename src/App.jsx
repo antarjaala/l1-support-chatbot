@@ -1,0 +1,284 @@
+import React, { useState, useRef, useEffect, useCallback } from 'react'
+import { SYSTEM_PROMPT, QUICK_QUERIES, STARTER_CHIPS } from './constants'
+import styles from './App.module.css'
+
+const PhoneIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="20" height="20"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 .94h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>)
+const UserIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0112 0v2"/></svg>)
+const SendIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>)
+const PlusIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>)
+const HelpIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>)
+
+function FormattedText({ text }) {
+  const parts = text.split('\n')
+  return (
+    <div>
+      {parts.map((line, i) => {
+        const numMatch = line.match(/^(\d+)\.\s(.+)/)
+        const bulletMatch = line.match(/^[-]\s(.+)/)
+        if (numMatch) return (
+          <div key={i} className={styles.numberedLine}>
+            <span className={styles.stepNum}>{numMatch[1]}</span>
+            <span dangerouslySetInnerHTML={{ __html: numMatch[2].replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/`(.+?)`/g,'<code>$1</code>') }} />
+          </div>
+        )
+        if (bulletMatch) return (
+          <div key={i} className={styles.bulletLine}>
+            <span className={styles.bulletDot}>▶</span>
+            <span dangerouslySetInnerHTML={{ __html: bulletMatch[1].replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/`(.+?)`/g,'<code>$1</code>') }} />
+          </div>
+        )
+        if (line.trim() === '') return <br key={i} />
+        return <p key={i} className={styles.textLine} dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/`(.+?)`/g,'<code>$1</code>') }} />
+      })}
+    </div>
+  )
+}
+
+function TypingIndicator() {
+  return (
+    <div className={styles.msg}>
+      <div className={`${styles.msgAvatar} ${styles.botAvatar}`}>AI</div>
+      <div className={styles.msgBody}>
+        <div className={styles.msgSender}>L1 Assistant</div>
+        <div className={`${styles.bubble} ${styles.botBubble}`}>
+          <div className={styles.typingDots}><span /><span /><span /></div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function App() {
+  const [messages, setMessages] = useState([])
+  const [history, setHistory] = useState([])
+  const [input, setInput] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [showGuide, setShowGuide] = useState(false)
+  const [provider, setProvider] = useState(() => localStorage.getItem('hh_l1_provider') || 'groq')
+  const [apiKey, setApiKey] = useState(() => localStorage.getItem('hh_l1_api_key') || '')
+  const [apiKeyInput, setApiKeyInput] = useState(() => localStorage.getItem('hh_l1_api_key') || '')
+  const [keyStatus, setKeyStatus] = useState(() => localStorage.getItem('hh_l1_api_key') ? 'saved' : '')
+  const messagesEndRef = useRef(null)
+  const textareaRef = useRef(null)
+
+  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages, loading])
+
+  const saveApiKey = () => {
+    const k = apiKeyInput.trim()
+    if (!k) { setKeyStatus('empty'); return }
+    localStorage.setItem('hh_l1_api_key', k)
+    localStorage.setItem('hh_l1_provider', provider)
+    setApiKey(k)
+    setKeyStatus('saved')
+  }
+
+  const sendMessage = useCallback(async (text) => {
+    const msg = (text || input).trim()
+    if (!msg || loading) return
+    const activeKey = apiKey || apiKeyInput.trim()
+    if (!activeKey) { setKeyStatus('missing'); return }
+    setInput('')
+    if (textareaRef.current) textareaRef.current.style.height = 'auto'
+    const userMsg = { role: 'user', content: msg, id: Date.now() }
+    setMessages(prev => [...prev, userMsg])
+    const newHistory = [...history, { role: 'user', content: msg }]
+    setHistory(newHistory)
+    setLoading(true)
+    try {
+      const { askAI } = await import('./api.js')
+      const reply = await askAI(apiKey, SYSTEM_PROMPT, newHistory, provider)
+      setHistory(prev => [...prev, { role: 'assistant', content: reply }])
+      setMessages(prev => [...prev, { role: 'bot', content: reply, id: Date.now() }])
+    } catch (err) {
+      const isAuth = err.message?.includes('401') || err.message?.toLowerCase().includes('invalid')
+      if (isAuth) { setKeyStatus('invalid'); setApiKey(''); localStorage.removeItem('hh_l1_api_key') }
+      const errorMsg = isAuth ? 'Invalid API key. Please update the key in the sidebar.' : 'Error: ' + (err.message || 'Unknown error')
+      setMessages(prev => [...prev, { role: 'bot', content: errorMsg, id: Date.now(), isError: true }])
+    }
+    setLoading(false)
+  }, [input, loading, apiKey, history])
+
+  const handleKeyDown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }
+
+  const handleTextareaInput = (e) => {
+    setInput(e.target.value)
+    e.target.style.height = 'auto'
+    e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px'
+  }
+
+  const keyStatusMsg = {
+    saved: { text: 'Connected', cls: styles.keyOk },
+    invalid: { text: 'Invalid key', cls: styles.keyErr },
+    missing: { text: 'Key required to chat', cls: styles.keyErr },
+    empty: { text: 'Please enter a key', cls: styles.keyErr },
+  }[keyStatus] || null
+
+  return (
+    <div className={styles.app}>
+      <aside className={styles.sidebar}>
+        <div className={styles.sidebarHeader}>
+          <div className={styles.logoRow}>
+            <div className={styles.logoIcon}><PhoneIcon /></div>
+            <div className={styles.logoText}>HH L1 Support<span className={styles.logoSub}>Happiest Minds Technologies</span></div>
+          </div>
+          <div className={styles.statusPill}><span className={styles.statusDot} />Assistant Online</div>
+        </div>
+
+        <div className={styles.sidebarSection}>
+          <div className={styles.sidebarLabel}>AI Provider</div>
+          <select className={`${styles.apiKeyInput} ${styles.providerSelect}`} value={provider} onChange={e => { setProvider(e.target.value); setKeyStatus(''); localStorage.setItem('hh_l1_provider', e.target.value) }}>
+            <option value="groq">Groq (Llama)</option>
+            <option value="anthropic">Anthropic (Claude)</option>
+          </select>
+        </div>
+
+        <div className={styles.apiKeySection}>
+          <div className={styles.sidebarLabel}>{provider === 'anthropic' ? 'Anthropic API Key' : 'Groq API Key'}</div>
+          <div className={styles.apiKeyRow}>
+            <input type="password" className={styles.apiKeyInput} placeholder={provider === 'anthropic' ? 'sk-ant-...' : 'gsk_...'} value={apiKeyInput} onChange={e => { setApiKeyInput(e.target.value); setKeyStatus('') }} onKeyDown={e => e.key === 'Enter' && saveApiKey()} autoComplete="off" />
+            <button className={`${styles.apiKeySaveBtn} ${keyStatus === 'saved' ? styles.apiKeySaved : ''}`} onClick={saveApiKey}>{keyStatus === 'saved' ? '✓ Saved' : 'Save'}</button>
+          </div>
+          {keyStatusMsg && <div className={`${styles.keyStatus} ${keyStatusMsg.cls}`}>{keyStatusMsg.text}</div>}
+          <div className={styles.keyHint}>Get key: <a href={provider === 'anthropic' ? 'https://console.anthropic.com/' : 'https://console.groq.com/keys'} target="_blank" rel="noreferrer" className={styles.keyLink}>{provider === 'anthropic' ? 'console.anthropic.com' : 'console.groq.com'}</a></div>
+        </div>
+
+        <div className={styles.sidebarDivider} />
+        <div className={styles.sidebarSection}>
+          <div className={styles.sidebarLabel}>Quick Queries</div>
+          <select className={`${styles.apiKeyInput} ${styles.querySelect}`} onChange={(e) => {
+            if (e.target.value) {
+              sendMessage(e.target.value);
+              e.target.value = ''; // Reset selection
+            }
+          }}>
+            <option value="">Select a common issue...</option>
+            {QUICK_QUERIES.map((q, index) => (
+              <option key={index} value={q.query}>
+                {q.icon} {q.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className={styles.sidebarDivider} />
+        <div className={styles.sidebarSection}>
+          <div className={styles.sidebarLabel}>Escalation Contacts</div>
+          <div className={styles.contactCard}>
+            {[
+              { order: '1st', name: 'Aditya Narayan Sahoo', role: 'L2 Support Dev' },
+              { order: '2nd', name: 'Srinath V', role: 'L2 Manager' }
+            ].map((contact, idx) => (
+              <div key={idx} className={styles.contactRow}>
+                <span className={styles.contactOrder}>{contact.order}</span>
+                <div className={styles.contactInfo}>
+                  <div className={styles.contactName}>{contact.name}</div>
+                  <div className={styles.contactRole}>{contact.role}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className={styles.sidebarDivider} />
+        <div className={styles.sidebarSection}>
+          <div className={styles.sidebarLabel}>SLA Reference</div>
+          <div className={styles.slaCard}>
+            {[{p:'P1',cls:styles.p1,time:'Respond 15 min · Resolve 2 hr'},{p:'P2',cls:styles.p2,time:'Respond 15 min · Resolve 4 hr'},{p:'P3',cls:styles.p3,time:'Respond 2 hr · Resolve 2 days'},{p:'P4',cls:styles.p4,time:'Respond 1 day · Next release'}].map(row => (
+              <div key={row.p} className={styles.slaRow}><span className={`${styles.slaBadge} ${row.cls}`}>{row.p}</span><span className={styles.slaTime}>{row.time}</span></div>
+            ))}
+          </div>
+        </div>
+        <div className={styles.sidebarFooter}>
+          <button className={styles.newChatBtn} onClick={() => { setMessages([]); setHistory([]) }}><PlusIcon /> New Conversation</button>
+        </div>
+      </aside>
+
+      <main className={styles.main}>
+        <div className={styles.chatHeader}>
+          <div className={styles.chatHeaderLeft}>
+            <div className={styles.headerAvatar}><UserIcon /></div>
+            <div><div className={styles.chatTitle}>L1 Support Assistant</div><div className={styles.chatSubtitle}>Happiest Health PMS · ERPNext Healthcare</div></div>
+          </div>
+          <button className={styles.helpBtn} onClick={() => setShowGuide(!showGuide)} title="How to use this chatbot"><HelpIcon /></button>
+        </div>
+
+        {showGuide && (
+          <div className={styles.guidePanel}>
+            <div className={styles.guidePanelHeader}>
+              <h3>How to Use This Chatbot</h3>
+              <button className={styles.guideCloseBtn} onClick={() => setShowGuide(false)}>✕</button>
+            </div>
+            <div className={styles.guidePanelContent}>
+              <div className={styles.guideSection}>
+                <h4>🔑 Step 1: Add Your API Key</h4>
+                <p>Choose your AI provider (Groq for free or Anthropic for premium) in the sidebar dropdown. Paste your API key and click Save.</p>
+              </div>
+              <div className={styles.guideSection}>
+                <h4>🎯 Step 2: Ask Questions</h4>
+                <p>Type any question about Happiest Health PMS, ERPNext issues, billing, therapy sessions, or SLA procedures. The chatbot will provide detailed guidance.</p>
+              </div>
+              <div className={styles.guideSection}>
+                <h4>⚡ Step 3: Use Quick Queries</h4>
+                <p>Use the "Quick Queries" dropdown in the sidebar to instantly get answers to the most common L1 support issues. Perfect for quick lookups.</p>
+              </div>
+              <div className={styles.guideSection}>
+                <h4>📋 Step 4: Check SLA & Escalation</h4>
+                <p>Reference the SLA panel to understand priority levels and response times. Use the Escalation Contacts to know who to reach out to.</p>
+              </div>
+              <div className={styles.guideSection}>
+                <h4>💡 Pro Tips</h4>
+                <ul>
+                  <li><strong>Be Specific:</strong> Include patient names, ticket numbers, and exact error messages for better guidance.</li>
+                  <li><strong>Use Context:</strong> Mention which clinic, user role, or module you're dealing with.</li>
+                  <li><strong>Escalate Early:</strong> Don't hesitate to escalate to L2 if you suspect a system issue.</li>
+                  <li><strong>Document Everything:</strong> Always log tickets in ServiceNow before troubleshooting.</li>
+                  <li><strong>Free vs Paid:</strong> Groq (free) works great for most queries - try it first before using your Anthropic credit.</li>
+                </ul>
+              </div>
+              <div className={styles.guideSection}>
+                <h4>🚀 Example Queries</h4>
+                <p>✓ "Patient login fails from desktop but works on mobile - what's the fix?"<br/>✓ "How do I fix a frozen Razorpay payment?"<br/>✓ "Therapy plan shows In Progress even after sessions are done"<br/>✓ "What's the SLA for a P1 billing issue?"<br/>✓ "Who do I escalate infrastructure problems to?"</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className={styles.messages}>
+          {messages.length === 0 && (
+            <div className={styles.welcome}>
+              <div className={styles.welcomeIcon}><PhoneIcon /></div>
+              <h2 className={styles.welcomeTitle}>Happiest Health L1 Support Guide</h2>
+              <p className={styles.welcomeDesc}>AI-powered first-contact resolution for Happiest Health PMS. Start by adding your API key in the sidebar.</p>
+              <div className={styles.chips}>
+                {STARTER_CHIPS.map(c => <button key={c.label} className={styles.chip} onClick={() => sendMessage(c.query)}>{c.label}</button>)}
+              </div>
+              <div className={styles.welcomeHints}>
+                <div className={styles.hint}>💡 First time? Click the <strong>?</strong> button in the header for a quick guide.</div>
+                <div className={styles.hint}>⚡ Use <strong>Quick Queries</strong> in the sidebar for instant answers to common issues.</div>
+                <div className={styles.hint}>🔑 Choose <strong>Groq (free)</strong> or <strong>Anthropic</strong> from the provider dropdown.</div>
+              </div>
+            </div>
+          )}
+          {messages.map(msg => (
+            <div key={msg.id} className={`${styles.msg} ${msg.role==='user'?styles.userMsg:''}`}>
+              <div className={`${styles.msgAvatar} ${msg.role==='user'?styles.userAvatar:styles.botAvatar}`}>{msg.role==='user'?'ME':'AI'}</div>
+              <div className={styles.msgBody}>
+                <div className={`${styles.msgSender} ${msg.role==='user'?styles.userSender:''}`}>{msg.role==='user'?'You':'L1 Assistant'}</div>
+                <div className={`${styles.bubble} ${msg.role==='user'?styles.userBubble:styles.botBubble} ${msg.isError?styles.errorBubble:''}`}>
+                  {msg.role==='user' ? msg.content : <FormattedText text={msg.content} />}
+                </div>
+              </div>
+            </div>
+          ))}
+          {loading && <TypingIndicator />}
+          <div ref={messagesEndRef} />
+        </div>
+        <div className={styles.inputArea}>
+          <div className={styles.inputRow}>
+            <textarea ref={textareaRef} className={styles.textarea} placeholder="Describe the user's issue or ask a question..." value={input} onChange={handleTextareaInput} onKeyDown={handleKeyDown} rows={1} />
+            <button className={styles.sendBtn} onClick={() => sendMessage()} disabled={loading || !input.trim()}><SendIcon /></button>
+          </div>
+          <div className={styles.inputHint}><span>Enter to send · Shift+Enter for new line</span><span className={styles.hintTag}>Symptom → Steps → Escalate If</span></div>
+        </div>
+      </main>
+    </div>
+  )
+}
